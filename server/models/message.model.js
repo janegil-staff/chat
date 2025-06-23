@@ -1,8 +1,7 @@
-import { model, models, Schema } from "mongoose";
+import mongoose from "mongoose";
+const { ObjectId } = mongoose.Schema.Types;
 
-const { ObjectId } = Schema.Types;
-
-const messageSchema = Schema(
+const messageSchema = mongoose.Schema(
   {
     sender: {
       type: ObjectId,
@@ -24,6 +23,6 @@ const messageSchema = Schema(
   }
 );
 
-const Message = models.Message || model("Message", messageSchema);
+const Message = mongoose.models.Message || mongoose.model("Message", messageSchema);
 
 export default Message;

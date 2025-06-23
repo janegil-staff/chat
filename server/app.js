@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
-app.use("/api/v1", routes);
+app.use("/api", routes);
 
 app.use(async (error, res, next) => {
   next(new Error("This route does not exist"));

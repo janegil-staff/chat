@@ -1,6 +1,7 @@
-import { model, models, Schema } from "mongoose";
-const { ObjectId } = Schema.Types;
-const conversationSchema = Schema(
+import mongoose from "mongoose";
+const { ObjectId } = mongoose.Schema.Types;
+
+const conversationSchema = mongoose.Schema(
   {
     name: {
       type: String,
@@ -38,6 +39,6 @@ const conversationSchema = Schema(
 );
 
 const Conversation =
-  models.Conversation || model("Conversation", conversationSchema);
+  mongoose.models.Conversation || mongoose.model("Conversation", conversationSchema);
 
 export default Conversation;

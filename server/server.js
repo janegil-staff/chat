@@ -1,18 +1,26 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import mongoose from "mongoose";
+import app from "./app.js";
 
-dotenv.config();
+const { DATABASE_URL } = process.env;
+const PORT = process.env.PORT || 5001;
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Hello from Express backend!");
+mongoose.connection.on("error", (err) => {
+  console.log(`Mongodb connection error : ${err}`);
+  process.exit(1);
 });
 
-const PORT = process.env.PORT || 5001;
+if (process.env.NODE_ENV !== "production") {
+  mongoose.set("debug", true);
+}
+mongoose
+  .connect(DATABASE_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connected to mongodb");
+  });
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
