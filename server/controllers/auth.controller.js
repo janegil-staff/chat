@@ -1,37 +1,48 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import cloudinary from 'cloudinary';
-import User from '../models/user.model.js';
-
-// Cloudinary config
-cloudinary.v2.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
-});
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
+import cloudinary from "../configs/cloudinary.config.js";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, confirmPassword, status, image } = req.body;
 
+    if(!name || !email || !password) {
+      return res.status(400).json({ message: "Please fill all the fields" });
+    }
     // Check for existing user
     const existingUser = await User.findOne({ email });
-    if (existingUser)
+
+    if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords doees not match" });
+    }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Upload image if provided
-    let imageUrl = process.env.DEFAULT_PICTURE;
-    if (req.files?.image) {
-      const result = await cloudinary.v2.uploader.upload(
-        req.files.image.tempFilePath,
-        {
-          folder: "chat",
+    let picture;
+    if (image) {
+      // base64 format
+      if (image.startsWith("data:image")) {
+        try {
+          const uploadResponse = await cloudinary.uploader.upload(image, {
+            folder: "chat",
+          });
+          picture = uploadResponse.secure_url;
+        } catch (error) {
+          console.error("Error uploading image:", error);
+
+          return res.status(400).json({
+            success: false,
+            message: "Error uploading image",
+          });
         }
-      );
-      imageUrl = result.secure_url;
+      }
     }
 
     // Create user
@@ -39,7 +50,7 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      image: imageUrl,
+      image: picture || process.env.DEFAULT_PICTURE,
       status: process.env.DEFAULT_STATUS || "Available",
     });
 
@@ -64,15 +75,16 @@ export const login = async (req, res) => {
 
     // Check if user exists
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     // Generate JWT
     const token = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '1h',
+      expiresIn: "1h",
     });
 
     res.status(200).json({ user, token });
