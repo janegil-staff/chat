@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../features/user/userSlice";
 import { useState } from "react";
 import Picture from "./Picture";
@@ -43,7 +43,7 @@ export default function RegisterForm() {
         navigate("/");
       }
     } else {
-      let res = await dispatch(registerUser({ ...formData}));
+      let res = await dispatch(registerUser({ ...formData }));
       if (res?.payload?.user) {
         navigate("/");
       }
@@ -74,6 +74,7 @@ export default function RegisterForm() {
           handleChange={handleChange}
           error={error}
         />
+
         <AuthInput
           name="password"
           type="password"
@@ -100,6 +101,15 @@ export default function RegisterForm() {
         >
           Sign Up
         </button>
+        <p className="flex flex-col items-center justify-center mt-10 text-center text-md dark:text-dark_text_1">
+          <span>have an account ?</span>
+          <Link
+            to="/login"
+            className=" hover:underline cursor-pointer transition ease-in duration-300"
+          >
+            Sign in
+          </Link>
+        </p>
       </form>
     </div>
   );

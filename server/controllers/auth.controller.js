@@ -1,13 +1,13 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
-import cloudinary from "../configs/cloudinary.config.js";
+import cloudinary from "../config/cloudinary.config.js";
 
 export const register = async (req, res) => {
   try {
     const { name, email, password, confirmPassword, status, image } = req.body;
 
-    if(!name || !email || !password) {
+    if (!name || !email || !password) {
       return res.status(400).json({ message: "Please fill all the fields" });
     }
     // Check for existing user
@@ -70,6 +70,7 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+  console.log(req.body);
   try {
     const { email, password } = req.body;
 
@@ -87,7 +88,7 @@ export const login = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ user, token });
+    res.status(200).json({ user, token, message: "User created successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
